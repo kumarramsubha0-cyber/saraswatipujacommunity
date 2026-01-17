@@ -209,24 +209,6 @@ function payNow(){
   `;
 
   openPage('success');
-}
-
-function loadHistory(){
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  historyList.innerHTML='';
-  h.forEach((r,i)=>{
-    let d=document.createElement('div');
-    d.className='receipt';
-    d.innerHTML=`${r.name} – ₹${r.amt}<br>${r.time}`;
-    d.oncontextmenu=e=>{
-      e.preventDefault();
-      let p=prompt("Enter Password");
-      if(p==="875719"){h.splice(i,1);localStorage.setItem('history',JSON.stringify(h));loadHistory();}
-      else alert("Wrong Password");
-    };
-    historyList.appendChild(d);
-  });
-}
 
 function searchReceipt(){
   let n=searchName.value,a=searchAmt.value;
@@ -239,6 +221,7 @@ function searchReceipt(){
 </script>
 </body>
 </html>
+
 
 
 
