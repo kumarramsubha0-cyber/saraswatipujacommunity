@@ -170,6 +170,7 @@ button{
 </div>
 
 <script>
+  const SERVER_URL ="https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
 function openPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -181,10 +182,13 @@ function payNow(){
   let n=donor.value,a=+amount.value;
   if(!n||a<250||a>5000){alert("Invalid details");return;}
   window.open(`https://www.upi.me/pay?pa=9471418396@ptyes&tn=saraswati&am=${a}`);
-  let t=new Date().toLocaleString();
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  h.push({name:n,amt:a,time:t});
-  localStorage.setItem('history',JSON.stringify(h));
+ saveToServer(n, a);
+
+  receiptBox.innerHTML=`<b>Organised by Mukesh Apartment</b><br>
+  Name: ${n}<br>Amount: ₹${a}<br>
+  <b style="animation:glow 2s infinite">Thanks for Donation</b>`;
+  openPage('success');
+}
   receiptBox.innerHTML=`<b>Organised by Mukesh Apartment</b><br>
   Name: ${n}<br>Amount: ₹${a}<br>${t}<br>
   <b style="animation:glow 2s infinite">Thanks for Donation</b>`;
@@ -192,20 +196,24 @@ function payNow(){
 }
 
 function loadHistory(){
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  historyList.innerHTML='';
-  h.forEach((r,i)=>{
-    let d=document.createElement('div');
-    d.className='receipt';
-    d.innerHTML=`${r.name} – ₹${r.amt}<br>${r.time}`;
-    d.oncontextmenu=e=>{
-      e.preventDefault();
-      let p=prompt("Enter Password");
-      if(p==="875719"){h.splice(i,1);localStorage.setItem('history',JSON.stringify(h));loadHistory();}
-      else alert("Wrong Password");
-    };
-    historyList.appendChild(d);
-  });
+  fetch(https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec)
+    .then(res => res.json())
+    .then(data => {
+      historyList.innerHTML = "";
+      data.forEach(r => {
+        let d = document.createElement("div");
+        d.className = "receipt";
+        d.innerHTML = `
+          <b>${r.name}</b><br>
+          Amount: ₹${r.amount}<br>
+          Date: ${r.date}<br>
+          Time: ${r.time}
+        `;
+        historyList.appendChild(d);
+      });
+    });
+}
+
 }
 
 function searchReceipt(){
@@ -216,6 +224,21 @@ function searchReceipt(){
   Name: ${r.name}<br>Amount: ₹${r.amt}<br>${r.time}`;openPage('success');}
   else alert("No record found");
 }
+
+  function saveToServer(name, amount){
+  fetch(SERVER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name: name,
+      amount: amount
+    })
+  });
+}
+
 </script>
 </body>
 </html>
+
