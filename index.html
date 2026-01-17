@@ -178,16 +178,33 @@ function openPage(id){
 function goHome(){openPage('home');}
 
 function payNow(){
-  let n=donor.value,a=+amount.value;
-  if(!n||a<250||a>5000){alert("Invalid details");return;}
+  let n = donor.value;
+  let a = +amount.value;
+
+  if(!n || a < 250 || a > 5000){
+    alert("Invalid details");
+    return;
+  }
+
   window.open(`https://www.upi.me/pay?pa=9471418396@ptyes&tn=saraswati&am=${a}`);
-  let t=new Date().toLocaleString();
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  h.push({name:n,amt:a,time:t});
-  localStorage.setItem('history',JSON.stringify(h));
-  receiptBox.innerHTML=`<b>Organised by Mukesh Apartment</b><br>
-  Name: ${n}<br>Amount: ₹${a}<br>${t}<br>
-  <b style="animation:glow 2s infinite">Thanks for Donation</b>`;
+
+  fetch("https://script.google.com/macros/s/AKfycbznpxEsjdJex6rP13r5_DpLrpdpZBuy6nW60mc6XTXgf5CIfQJ42wMgkAhvAZCJw0UL/exec", {
+    method: "POST",
+    body: JSON.stringify({
+      name: n,
+      amount: a
+    })
+  });
+
+  let t = new Date().toLocaleString();
+  receiptBox.innerHTML = `
+    <b>Organised by Mukesh Apartment</b><br>
+    Name: ${n}<br>
+    Amount: ₹${a}<br>
+    ${t}<br>
+    <b style="animation:glow 2s infinite">Thanks for Donation</b>
+  `;
+
   openPage('success');
 }
 
@@ -219,3 +236,4 @@ function searchReceipt(){
 </script>
 </body>
 </html>
+
