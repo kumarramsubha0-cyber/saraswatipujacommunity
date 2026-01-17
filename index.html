@@ -193,7 +193,10 @@ function payNow(){
     body: JSON.stringify({
       name: n,
       amount: a
-    })
+    }),
+    headers:{
+      "Content-Type":"application/json"
+    }
   });
 
   let t = new Date().toLocaleString();
@@ -236,4 +239,5 @@ function searchReceipt(){
 </script>
 </body>
 </html>
+
 
