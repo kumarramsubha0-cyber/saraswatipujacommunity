@@ -91,6 +91,7 @@ button{width:100%;padding:14px;border:none;border-radius:14px;background:linear-
   <input id="donor" placeholder="Enter Name">
   <input id="amount" type="number" placeholder="Amount (250–5000)">
   <button onclick="payNow()">Pay Now</button>
+    <button onclick="confirmPayment()" style="margin-top:10px;background:linear-gradient(145deg,#4caf50,#2e7d32)">✔ I Have Paid</button>
 </div>
 
 <div class="page" id="success">
@@ -134,9 +135,15 @@ function goHome(){ openPage('home'); }
 function payNow(){
   const a = Number(document.getElementById('amount').value);
   if(a < 250 || a > 5000){
-    alert('Invalid amount');
+    alert('Amount 250 se 5000 ke beech hona chahiye');
     return;
   }
+
+  // ✅ MOST RELIABLE ANDROID UPI METHOD (INTENT)
+  const upiIntent = `intent://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&tn=Donation&am=${a}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
+
+  window.location.href = upiIntent;
+}
   const upi = `upi://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&tn=Donation&am=${a}&cu=INR`;
   window.location.href = upi;
 }
