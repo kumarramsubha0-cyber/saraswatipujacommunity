@@ -122,48 +122,52 @@ button{width:100%;padding:14px;border:none;border-radius:14px;background:linear-
 </div>
 
 <script>
+// 🔴 DEBUG ALERT – agar ye alert nahi aaya to JS load hi nahi ho raha
+alert('JS LOADED OK');
+
 const SERVER_URL = "https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
 
 function openPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const el = document.getElementById(id);
-  if(el) el.classList.add('active');
-  if(id==='history') loadHistory();
+  if(!el){ alert('Page not found: '+id); return; }
+  el.classList.add('active');
 }
+
 function goHome(){ openPage('home'); }
 
 function payNow(){
-  const a = Number(document.getElementById('amount').value);
+  const amtEl = document.getElementById('amount');
+  if(!amtEl){ alert('Amount input missing'); return; }
+
+  const a = Number(amtEl.value);
+
+  // ✅ STRONG VALIDATION (NO NEGATIVE / EMPTY / ZERO)
+  if(isNaN(a) || a <= 0){
+    alert('Kripya sahi payment amount dalo');
+    return;
+  }
   if(a < 250 || a > 5000){
     alert('Amount 250 se 5000 ke beech hona chahiye');
     return;
   }
 
-  // 🔴 SAFEST METHOD: SHOW CLICKABLE UPI LINK (NO AUTO REDIRECT)
-  const upiLink = `upi://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&tn=Donation&am=${a}&cu=INR`;
+  const upi = `upi://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&am=${a}&cu=INR`;
 
   document.getElementById('receiptBox').innerHTML = `
-    <b>UPI Payment Link</b><br><br>
-    <a href="${upiLink}" style="display:block;padding:14px;text-align:center;background:#4caf50;color:#fff;border-radius:12px;text-decoration:none;font-size:18px">👉 Click to Pay via UPI</a><br>
-    <small>(Agar auto open nahi ho, to is button par click karo)</small>
+    <h3>UPI Payment</h3>
+    <p>Amount: <b>₹${a}</b></p>
+    <a href="${upi}" style="display:block;padding:15px;background:green;color:white;text-align:center;border-radius:12px;text-decoration:none;font-size:18px">CLICK HERE TO PAY</a>
+    <p style="margin-top:10px">Payment ke baad <b>I Have Paid</b> dabao</p>
   `;
 
   openPage('success');
 }
 
-  // ✅ MOST RELIABLE ANDROID UPI METHOD (INTENT)
-  const upiIntent = `intent://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&tn=Donation&am=${a}&cu=INR#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`;
-
-  window.location.href = upiIntent;
-}
-  const upi = `upi://pay?pa=9471418396@ptyes&pn=Saraswati%20Puja&tn=Donation&am=${a}&cu=INR`;
-  window.location.href = upi;
-}
-
 function confirmPayment(){
   const n = document.getElementById('donor').value;
-  const a = Number(document.getElementById('amount').value);
-  if(!n || !a){ alert('Name aur Amount bharna zaroori hai'); return; }
+  const a = document.getElementById('amount').value;
+  if(!n || !a){ alert('Name aur amount zaroori hai'); return; }
 
   fetch(SERVER_URL,{
     method:'POST',
@@ -171,50 +175,7 @@ function confirmPayment(){
     body: JSON.stringify({name:n, amount:a})
   }).catch(()=>{});
 
-  document.getElementById('receiptBox').innerHTML = `
-    <b>Organised by Mukesh Apartment</b><br>
-    Name: ${n}<br>
-    Amount: ₹${a}<br>
-    Status: <b style="color:green">Payment Confirmed</b><br>
-    ${new Date().toLocaleString()}<br>
-    <b style="animation:glow 2s infinite">Thanks for Donation</b>
-  `;
-  openPage('success');
-}
-
-function loadHistory(){
-  fetch(SERVER_URL)
-    .then(r=>r.json())
-    .then(d=>{
-      const list = document.getElementById('historyList');
-      list.innerHTML='';
-      d.forEach(r=>{
-        const div=document.createElement('div');
-        div.className='receipt';
-        div.innerHTML = `${r.name} – ₹${r.amount}<br>${r.date || ''} ${r.time || ''}`;
-        list.appendChild(div);
-      });
-    })
-    .catch(()=>{
-      document.getElementById('historyList').innerHTML = 'No data';
-    });
-}
-
-function searchReceipt(){
-  const n = document.getElementById('searchName').value;
-  const a = document.getElementById('searchAmt').value;
-  fetch(`${SERVER_URL}?name=${encodeURIComponent(n)}&amount=${encodeURIComponent(a)}`)
-    .then(r=>r.json())
-    .then(r=>{
-      if(!r){ alert('No record found'); return; }
-      document.getElementById('receiptBox').innerHTML = `
-        <b>Organised by Mukesh Apartment</b><br>
-        Name: ${r.name}<br>
-        Amount: ₹${r.amount}<br>
-        ${r.date || ''} ${r.time || ''}
-      `;
-      openPage('success');
-    });
+  alert('Payment confirmed (manual)');
 }
 </script>
 </body>
