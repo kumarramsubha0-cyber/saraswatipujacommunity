@@ -8,6 +8,7 @@
 <style>
 *{box-sizing:border-box;font-family:Segoe UI,sans-serif}
 body{margin:0;background:#000;display:flex;justify-content:center}
+
 .phone{
   width:390px;height:780px;
   background:linear-gradient(180deg,#f7d87c,#fff6d5);
@@ -21,12 +22,11 @@ body{margin:0;background:#000;display:flex;justify-content:center}
              inset -12px 0 25px rgba(0,0,0,.2);
   pointer-events:none;
 }
+
 header{text-align:center;padding:18px 10px 10px}
 h1{margin:0;font-size:24px;color:#7b3f00;animation:glow 2s infinite alternate}
 @keyframes glow{from{text-shadow:0 0 5px #fff}to{text-shadow:0 0 18px gold}}
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
 .screen{height:640px;padding:10px}
 .page{display:none;height:100%;overflow:auto}
@@ -78,46 +78,45 @@ button{
 <!-- HOME -->
 <div class="page active" id="home">
   <div class="apps">
-    <div class="app" onclick="openPage('puja')"><div class="icon">🎵</div><span>Puja</span></div>
-    <div class="app" onclick="openPage('card')"><div class="icon">🪔</div><span>Card</span></div>
-    <div class="app" onclick="openPage('pay')"><div class="icon">₹</div><span>Pay</span></div>
-    <div class="app" onclick="openPage('receiptSearch')"><div class="icon">🧾</div><span>Receipt</span></div>
+    <div class="app" onclick="openPage('pay')">
+      <div class="icon">₹</div><span>Pay</span>
+    </div>
+    <div class="app" onclick="openPage('receiptSearch')">
+      <div class="icon">🧾</div><span>Receipt</span>
+    </div>
   </div>
 </div>
 
-<!-- PUJA -->
-<div class="page" id="puja">
-<p class="back" onclick="goHome()">⬅ Home</p>
-<h2 style="text-align:center;animation:glow 2s infinite">🎶 Saraswati Vandana 🎶</h2>
-<audio controls autoplay loop style="width:100%">
-  <source src="puja-song.m4a" type="audio/mp4">
-</audio>
-</div>
-
-<!-- CARD -->
-<div class="page" id="card">
-<p class="back" onclick="goHome()">⬅ Home</p>
-<img src="photo.jpg" style="width:100%;border-radius:18px">
-</div>
-
-<!-- PAY (AMOUNT → QR) -->
+<!-- PAY -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <h2 style="animation:glow 2s infinite">Saraswati Puja Donation</h2>
 
 <input id="donor" placeholder="Enter Name">
 
-<input id="amount" type="number" placeholder="Amount (250–5000)"
+<input id="amount" type="number"
+       placeholder="Amount (250–5000)"
        oninput="showQR()">
 
 <div id="qrBox" style="display:none;text-align:center;margin-top:15px">
   <p><b>Scan QR & Pay ₹<span id="qrAmount"></span></b></p>
+
   <img src="upi-qr.png"
-       style="width:100%;max-width:260px;border-radius:18px;
+       style="width:100%;max-width:260px;
+       border-radius:18px;
        box-shadow:0 10px 25px rgba(0,0,0,.3)">
+
+  <div style="margin-top:12px;text-align:left">
+    <label>
+      <input type="checkbox" id="paidCheck" onchange="togglePayBtn()">
+      I have completed the payment
+    </label>
+  </div>
 </div>
 
-<button onclick="confirmPayment()">Payment Done</button>
+<button id="payBtn" style="display:none" onclick="confirmPayment()">
+Payment Done
+</button>
 </div>
 
 <!-- SUCCESS -->
@@ -139,7 +138,6 @@ button{
 
 <div class="bottom">
 <div onclick="goHome()">🏠 Home</div>
-<div onclick="openPage('history')">📜 History</div>
 </div>
 
 </div>
@@ -158,9 +156,15 @@ let amt=+amount.value;
 if(amt>=250 && amt<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=amt;
+  paidCheck.checked=false;
+  payBtn.style.display="none";
 }else{
   qrBox.style.display="none";
 }
+}
+
+function togglePayBtn(){
+payBtn.style.display = paidCheck.checked ? "block" : "none";
 }
 
 function confirmPayment(){
@@ -177,7 +181,7 @@ let h=JSON.parse(localStorage.getItem('history')||'[]');
 h.push({name:n,amt:a,time:t});
 localStorage.setItem('history',JSON.stringify(h));
 
-receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
+receiptBox.innerHTML=`<b>Name:</b> ${n}<br><b>Amount:</b> ₹${a}<br>${t}`;
 openPage('success');
 }
 
@@ -186,7 +190,7 @@ let n=searchName.value,a=searchAmt.value;
 let h=JSON.parse(localStorage.getItem('history')||'[]');
 let r=h.find(x=>x.name===n&&x.amt==a);
 if(r){
-receiptBox.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amt}<br>${r.time}`;
+receiptBox.innerHTML=`<b>Name:</b> ${r.name}<br><b>Amount:</b> ₹${r.amt}<br>${r.time}`;
 openPage('success');
 }else alert("No record found");
 }
