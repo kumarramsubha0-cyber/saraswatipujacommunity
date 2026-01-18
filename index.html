@@ -1,76 +1,135 @@
-const SERVER_URL = "PASTE_YOUR_SCRIPT_URL_HERE";
-
-/* PAGE CONTROL */
-function openPage(id){
-  document.querySelectorAll(".page").forEach(p=>p.style.display="none");
-  document.getElementById(id).style.display="block";
-  if(id==="history") loadHistory();
-}
-
-/* PAYMENT */
-function payNow(){
-  let n = donor.value;
-  let a = +amount.value;
-
-  if(!n || a<250 || a>5000){
-    alert("Invalid details");
-    return;
-  }
-
-  window.open(`https://www.upi.me/pay?pa=9471418396@ptyes&am=${a}`);
-
-  fetch(SERVER_URL,{
-    method:"POST",
-    body:JSON.stringify({name:n,amount:a})
-  });
-
-  let t=new Date().toLocaleString();
-  receiptBox.innerHTML=`
-    <b>Organised by Mukesh Apartment</b><br>
-    Name: ${n}<br>
-    Amount: ₹${a}<br>
-    ${t}<br>
-    <b style="animation:glow 2s infinite">Thanks for Donation</b>
-  `;
-  openPage("success");
-}
-
-/* LOAD HISTORY */
-function loadHistory(){
-  fetch(SERVER_URL)
-  .then(r=>r.json())
-  .then(data=>{
-    historyList.innerHTML="";
-    data.forEach(r=>{
-      let d=document.createElement("div");
-      d.className="receipt";
-      d.innerHTML=`
-        <b>${r.name}</b><br>
-        Amount: ₹${r.amount}<br>
-        Date: ${r.date}<br>
-        Time: ${r.time}
-      `;
-      historyList.appendChild(d);
-    });
-  });
-}
-
-/* SEARCH */
-function searchReceipt(){
-  let n=searchName.value;
-  let a=searchAmt.value;
-
-  fetch(`${SERVER_URL}?name=${n}&amount=${a}`)
-  .then(r=>r.json())
-  .then(r=>{
-    if(!r){alert("No record found");return;}
-    receiptBox.innerHTML=`
-      <b>Organised by Mukesh Apartment</b><br>
-      Name: ${r.name}<br>
-      Amount: ₹${r.amount}<br>
-      Date: ${r.date}<br>
-      Time: ${r.time}
-    `;
-    openPage("success");
-  });
-}
+<!DOCTYPE html> 
+<html lang="hi"> 
+<head> 
+<meta charset="UTF-8"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+<title>Saraswati Puja Donation</title> 
+<style> 
+body{font-family:Arial;background:#f4f4f4;padding:20px} 
+.box{background:#fff;padding:15px;border-radius:10px;max-width:420px} 
+input,button{width:100%;padding:10px;margin:6px 0} 
+button{cursor:pointer} 
+.hidden{display:none} 
+.receipt{border:1px solid #ddd;padding:8px;border-radius:6px;margin:6px 0} 
+@keyframes glow{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}} 
+</style> 
+</head> 
+<body> 
+<!-- HOME --> 
+<div class="box" id="home"> 
+<h2>Jay Maa Saraswati Puja</h2> 
+<input id="donor" placeholder="Enter Name"> 
+<input id="amount" type="number" placeholder="Amount"> 
+<button onclick="payNow()">Pay Now</button> 
+<button onclick="openPage('history')">History</button> 
+</div> 
+<!-- SUCCESS --> 
+<div class="box hidden" id="success"> 
+<div id="receiptBox"></div> 
+<button onclick="openPage('home')">Home</button> 
+</div> 
+<!-- HISTORY --> 
+<div class="box hidden" id="history"> 
+<h3>Donation History</h3> 
+<input id="searchName" placeholder="Search Name"> 
+<input id="searchAmt" placeholder="Amount"> 
+<button onclick="searchReceipt()">Search</button> 
+<div id="historyList"></div> 
+<button onclick="openPage('home')">Back</button> 
+</div> 
+ 
+<script> 
+/* 
+�
+�
+ APNA GOOGLE APPS SCRIPT URL YAHA PASTE KARO */ 
+const SERVER_URL = "https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec"; 
+ 
+/* PAGE SWITCH */ 
+function openPage(p){ 
+  home.classList.add("hidden"); 
+  success.classList.add("hidden"); 
+  history.classList.add("hidden"); 
+  document.getElementById(p).classList.remove("hidden"); 
+  if(p==="history") loadHistory(); 
+} 
+ 
+/* PAYMENT + SERVER SAVE */ 
+function payNow(){ 
+  let n = donor.value; 
+  let a = +amount.value; 
+  if(!n || a<250 || a>5000){ alert("Invalid details"); return; } 
+ 
+  window.open(`https://www.upi.me/pay?pa=9471418396@ptyes&tn=Saraswati&am=${a}`); 
+ 
+  fetch(SERVER_URL,{ 
+    method:"POST", 
+    body:JSON.stringify({action:"add",name:n,amount:a}) 
+  }); 
+ 
+  let t=new Date().toLocaleString(); 
+  receiptBox.innerHTML=` 
+    <b>Organised by Mukesh Apartment</b><br> 
+    Name: ${n}<br> 
+    Amount: ₹${a}<br> 
+    ${t}<br> 
+    <b style="animation:glow 2s infinite">Thanks for Donation</b> 
+  `; 
+  openPage("success"); 
+} 
+ 
+/* LOAD HISTORY */ 
+function loadHistory(){ 
+ fetch(SERVER_URL) 
+ .then(r=>r.json()) 
+ .then(data=>{ 
+   historyList.innerHTML=""; 
+   let total=0; 
+   data.forEach(r=>{ 
+     total+=Number(r.amount); 
+     let d=document.createElement("div"); 
+     d.className="receipt"; 
+     d.innerHTML=` 
+       <b>${r.name}</b><br> 
+       Amount: ₹${r.amount}<br> 
+       Date: ${r.date}<br> 
+       Time: ${r.time} 
+     `; 
+     d.oncontextmenu=e=>{ 
+       e.preventDefault(); 
+       let p=prompt("Admin Password"); 
+       if(p==="875719"){ 
+         fetch(SERVER_URL,{method:"POST",body:JSON.stringify({action:"delete",id:r.id})}) 
+         .then(()=>loadHistory()); 
+       } 
+     }; 
+     historyList.appendChild(d); 
+   }); 
+   let t=document.createElement("div"); 
+   t.innerHTML="<b>Total Collection: ₹"+total+"</b>"; 
+   historyList.prepend(t); 
+ }); 
+} 
+ 
+/* SEARCH */ 
+function searchReceipt(){ 
+ let n=searchName.value; 
+ let a=searchAmt.value; 
+ fetch(`${SERVER_URL}?name=${n}&amount=${a}`) 
+ .then(r=>r.json()) 
+ .then(r=>{ 
+   if(r){ 
+     receiptBox.innerHTML=` 
+       <b>Organised by Mukesh Apartment</b><br> 
+       Name: ${r.name}<br> 
+       Amount: ₹${r.amount}<br> 
+       Date: ${r.date}<br> 
+       Time: ${r.time} 
+     `; 
+     openPage("success"); 
+   }else alert("No record found"); 
+}); 
+} 
+</script> 
+</body> 
+</html>
