@@ -8,7 +8,6 @@
 <style>
 *{box-sizing:border-box;font-family:Segoe UI,sans-serif}
 body{margin:0;background:#000;display:flex;justify-content:center}
-
 .phone{
   width:390px;height:780px;
   background:linear-gradient(180deg,#f7d87c,#fff6d5);
@@ -22,7 +21,6 @@ body{margin:0;background:#000;display:flex;justify-content:center}
              inset -12px 0 25px rgba(0,0,0,.2);
   pointer-events:none;
 }
-
 header{text-align:center;padding:18px 10px 10px}
 h1{
   margin:0;font-size:24px;color:#7b3f00;
@@ -48,9 +46,7 @@ h1{
   background:linear-gradient(145deg,#fff,#e9e9e9);
   border-radius:26px;padding:18px 10px;text-align:center;
   box-shadow:0 12px 25px rgba(0,0,0,.25);
-  transition:.3s;
 }
-.app:hover{transform:translateY(-6px)}
 .icon{
   width:60px;height:60px;margin:auto;border-radius:50%;
   background:linear-gradient(145deg,#ff9800,#ff5722);
@@ -72,7 +68,6 @@ button{
 .receipt{
   background:#fff;padding:15px;border-radius:15px;margin-top:15px;
 }
-
 .bottom{
   position:absolute;bottom:0;left:0;right:0;
   height:60px;background:#fff;
@@ -103,118 +98,96 @@ button{
   </div>
 </div>
 
-<!-- APP 1 : PUJA -->
+<!-- PUJA -->
 <div class="page" id="puja">
-  <p class="back" onclick="goHome()">⬅ Home</p>
-  <h2 style="text-align:center;animation:glow 2s infinite">🎶 Saraswati Vandana 🎶</h2>
-  <div style="margin-top:25px;padding:20px;background:rgba(255,255,255,.75);
-       border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,.3);text-align:center;">
-    <div style="width:80px;height:80px;margin:auto;border-radius:50%;
-         background:linear-gradient(145deg,#ff9800,#ff5722);
-         display:flex;align-items:center;justify-content:center;
-         font-size:36px;color:#fff;animation:spin 6s linear infinite;">🎵</div>
-    <audio controls autoplay loop style="width:100%;margin-top:15px">
-      <source src="puja-song.m4a" type="audio/mp4">
-    </audio>
-  </div>
+<p class="back" onclick="goHome()">⬅ Home</p>
+<h2 style="text-align:center;animation:glow 2s infinite">🎶 Saraswati Vandana 🎶</h2>
+<audio controls autoplay loop style="width:100%">
+  <source src="puja-song.m4a" type="audio/mp4">
+</audio>
 </div>
 
-<!-- APP 2 : CARD (PHOTO MERGED) -->
+<!-- CARD -->
 <div class="page" id="card">
-  <p class="back" onclick="goHome()">⬅ Home</p>
-  <h2 style="text-align:center;animation:glow 2s infinite">Invitation Card</h2>
-  <div style="margin-top:15px;padding:12px;background:rgba(255,255,255,.65);
-       border-radius:22px;box-shadow:0 12px 28px rgba(0,0,0,.35);">
-    <img src="photo.jpg" alt="Saraswati Puja Invitation"
-      style="width:100%;border-radius:18px;animation:fadeIn 1.5s">
-  </div>
+<p class="back" onclick="goHome()">⬅ Home</p>
+<img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
-<!-- PAY -->
+<!-- PAY (QR) -->
 <div class="page" id="pay">
-  <p class="back" onclick="goHome()">⬅ Home</p>
-  <h2 style="animation:glow 2s infinite">Saraswati Puja Donation</h2>
-  <input id="donor" placeholder="Enter Name">
-  <input id="amount" type="number" placeholder="Amount (250–5000)">
-  <button onclick="payNow()">Pay Now</button>
+<p class="back" onclick="goHome()">⬅ Home</p>
+<h2 style="animation:glow 2s infinite">Saraswati Puja Donation</h2>
+
+<input id="donor" placeholder="Enter Name">
+<input id="amount" type="number" placeholder="Amount (250–5000)">
+
+<div style="text-align:center">
+  <p><b>Scan QR & Pay</b></p>
+  <img src="upi-qr.png" style="width:100%;max-width:260px;border-radius:18px">
+</div>
+
+<button onclick="confirmPayment()">Payment Done</button>
 </div>
 
 <!-- SUCCESS -->
 <div class="page" id="success">
-  <h2>✅ Payment Successful</h2>
-  <div class="receipt" id="receiptBox"></div>
-  <button onclick="window.print()">Print Receipt</button>
+<h2>✅ Payment Successful</h2>
+<div class="receipt" id="receiptBox"></div>
+<button onclick="window.print()">Print Receipt</button>
 </div>
 
 <!-- RECEIPT SEARCH -->
 <div class="page" id="receiptSearch">
-  <p class="back" onclick="goHome()">⬅ Home</p>
-  <input id="searchName" placeholder="Name">
-  <input id="searchAmt" placeholder="Amount">
-  <button onclick="searchReceipt()">Search & Print</button>
-</div>
-
-<!-- HISTORY -->
-<div class="page" id="history">
-  <p class="back" onclick="goHome()">⬅ Home</p>
-  <div id="historyList"></div>
+<p class="back" onclick="goHome()">⬅ Home</p>
+<input id="searchName" placeholder="Name">
+<input id="searchAmt" placeholder="Amount">
+<button onclick="searchReceipt()">Search</button>
 </div>
 
 </div>
 
 <div class="bottom">
-  <div onclick="goHome()"><i>🏠</i>Home</div>
-  <div onclick="openPage('card')"><i>🪔</i>Invitation</div>
-  <div onclick="openPage('history')"><i>📜</i>History</div>
+<div onclick="goHome()">🏠 Home</div>
+<div onclick="openPage('history')">📜 History</div>
 </div>
+
 </div>
 
 <script>
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
+
 function openPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='history') loadHistory();
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
 }
 function goHome(){openPage('home');}
 
-function payNow(){
-  let n=donor.value,a=+amount.value;
-  if(!n||a<250||a>5000){alert("Invalid details");return;}
-  window.open(`https://www.upi.me/pay?pa=9471418396@ptyes&tn=saraswati&am=${a}`);
-  let t=new Date().toLocaleString();
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  h.push({name:n,amt:a,time:t});
-  localStorage.setItem('history',JSON.stringify(h));
-  receiptBox.innerHTML=`<b>Organised by Mukesh Apartment</b><br>
-  Name: ${n}<br>Amount: ₹${a}<br>${t}<br>
-  <b style="animation:glow 2s infinite">Thanks for Donation</b>`;
-  openPage('success');
-}
+function confirmPayment(){
+let n=donor.value,a=+amount.value;
+if(!n||a<250||a>5000){alert("Invalid details");return;}
+let t=new Date().toLocaleString();
 
-function loadHistory(){
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  historyList.innerHTML='';
-  h.forEach((r,i)=>{
-    let d=document.createElement('div');
-    d.className='receipt';
-    d.innerHTML=`${r.name} – ₹${r.amt}<br>${r.time}`;
-    d.oncontextmenu=e=>{
-      e.preventDefault();
-      let p=prompt("Enter Password");
-      if(p==="875719"){h.splice(i,1);localStorage.setItem('history',JSON.stringify(h));loadHistory();}
-      else alert("Wrong Password");
-    };
-    historyList.appendChild(d);
-  });
+fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({name:n,amount:a,time:t})
+});
+
+let h=JSON.parse(localStorage.getItem('history')||'[]');
+h.push({name:n,amt:a,time:t});
+localStorage.setItem('history',JSON.stringify(h));
+
+receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
+openPage('success');
 }
 
 function searchReceipt(){
-  let n=searchName.value,a=searchAmt.value;
-  let h=JSON.parse(localStorage.getItem('history')||'[]');
-  let r=h.find(x=>x.name===n&&x.amt==a);
-  if(r){receiptBox.innerHTML=`<b>Organised by Mukesh Apartment</b><br>
-  Name: ${r.name}<br>Amount: ₹${r.amt}<br>${r.time}`;openPage('success');}
-  else alert("No record found");
+let n=searchName.value,a=searchAmt.value;
+let h=JSON.parse(localStorage.getItem('history')||'[]');
+let r=h.find(x=>x.name===n&&x.amt==a);
+if(r){
+receiptBox.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amt}<br>${r.time}`;
+openPage('success');
+}else alert("No record found");
 }
 </script>
 </body>
