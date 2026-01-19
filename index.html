@@ -47,7 +47,7 @@ input,button{
 }
 button{
  background:#ff5722;color:#fff;
- border:none;font-size:16px
+ border:none;font-size:16px;cursor:pointer
 }
 .paybtn{background:#1aa260}
 .back{font-weight:bold;color:#7b3f00;cursor:pointer}
@@ -171,14 +171,14 @@ td,th{border:1px solid #555;padding:4px;text-align:center}
 </div>
 
 <script>
-/* CONFIG */
+/* ===== CONFIG ===== */
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
 const ADMIN_PASS="875719";
 const UPI_ID="9471418396@ptyes";
+const IS_MOBILE=/Android|iPhone/i.test(navigator.userAgent);
 
-/* PC WARNING */
-if(!/Android|iPhone/i.test(navigator.userAgent)){
- pcWarn.innerText="⚠️ Payment ke liye Mobile Phone use kare";
+if(!IS_MOBILE){
+ pcWarn.innerText="⚠️ Payment sirf mobile phone par kaam karta hai";
 }
 
 function openPage(id){
@@ -191,47 +191,44 @@ function txnId(){return "PUJA-"+Date.now()}
 
 let CURRENT_UPI="";
 
-/* ✅ FINAL UNLOCKED showQR */
+/* ===== PAYMENT ===== */
 function showQR(){
- let a = Number(document.getElementById("amount").value);
-
+ let a=Number(amount.value);
  if(a>=250 && a<=5000){
   qrBox.style.display="block";
-
-  let upi = `upi://pay?pa=${UPI_ID}&pn=Saraswati%20Puja&cu=INR`;
-
-  qrImg.src =
-   "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-   encodeURIComponent(upi);
-
-  CURRENT_UPI = upi;
+  let upi=`upi://pay?pa=${UPI_ID}&pn=Saraswati%20Puja&am=${a}&cu=INR`;
+  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
+  CURRENT_UPI=upi;
  }else{
   qrBox.style.display="none";
   CURRENT_UPI="";
  }
 }
 
-function openUPI(){location.href=CURRENT_UPI}
+function openUPI(){
+ if(!IS_MOBILE){alert("Mobile use kare");return}
+ if(!CURRENT_UPI){alert("Valid amount dijiye");return}
+ window.location.href=CURRENT_UPI;
+}
 
 function startPayment(){
  let n=donor.value,a=+amount.value;
- if(!n||a<250||a>5000){alert("Invalid");return}
-
+ if(!n||a<250||a>5000){alert("Invalid details");return}
  let txn=txnId();
  fetch(SCRIPT_URL,{
   method:"POST",
   headers:{"Content-Type":"application/json"},
   body:JSON.stringify({
-   txn:txn,name:n,amount:a,
+   txn,name:n,amount:a,
    time:new Date().toLocaleString(),
    status:"PENDING"
   })
  });
-
  receiptBox.innerHTML=`Txn: ${txn}<br>Name: ${n}<br>Amount: ₹${a}`;
  openPage("success");
 }
 
+/* ===== ADMIN ===== */
 function searchReceipt(){
  fetch(SCRIPT_URL+"?admin=true")
  .then(r=>r.json())
