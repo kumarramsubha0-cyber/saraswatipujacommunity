@@ -41,7 +41,6 @@ button{
  background:linear-gradient(145deg,#ff9800,#ff5722);
  color:#fff;font-size:17px;cursor:pointer
 }
-.paybtn{background:#1aa260 !important;margin-top:12px}
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
 .bottom{
  position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
@@ -60,6 +59,7 @@ button{
 
 <div class="screen">
 
+<!-- HOME -->
 <div class="page active" id="home">
  <div class="apps">
   <div class="app" onclick="openPage('puja')"><div class="icon">🎵</div>Puja</div>
@@ -69,6 +69,7 @@ button{
  </div>
 </div>
 
+<!-- PUJA -->
 <div class="page" id="puja">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <audio controls autoplay loop style="width:100%">
@@ -76,34 +77,47 @@ button{
 </audio>
 </div>
 
+<!-- CARD -->
 <div class="page" id="card">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
+<!-- PAY -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
 
 <input id="donor" placeholder="Enter Name">
-<input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showQR()">
+<input id="amount" type="number" placeholder="Suggested Amount (250–5000)" oninput="showQR()">
 
 <div id="qrBox" style="display:none;text-align:center">
- <p><b>Scan & Pay (Recommended)</b></p>
- <p>Amount ₹<span id="qrAmount"></span></p>
+ <p><b>Scan & Pay (Amount editable)</b></p>
+ <p>Suggested ₹<span id="qrAmount"></span></p>
 
+ <img id="qrImg"
+  style="width:100%;max-width:260px;border-radius:18px;
+  box-shadow:0 10px 25px rgba(0,0,0,.3)">
 
- <button class="paybtn" onclick="openWebUPI()">📲 Pay Now</button>
+ <a id="upiBtn"
+  style="display:block;margin-top:12px;
+  background:#1aa260;color:#fff;
+  padding:12px;border-radius:14px;
+  text-decoration:none;font-weight:bold">
+  📲 Pay Now (Open UPI App)
+ </a>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
 </div>
 
+<!-- SUCCESS -->
 <div class="page" id="success">
 <h2>✅ Payment Saved</h2>
 <div id="receiptBox" class="receipt"></div>
 <button onclick="window.print()">Print</button>
 </div>
 
+<!-- RECEIPT SEARCH -->
 <div class="page" id="receiptSearch">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <input id="searchName" placeholder="Name">
@@ -111,6 +125,7 @@ button{
 <button onclick="searchReceipt()">Search</button>
 </div>
 
+<!-- HISTORY -->
 <div class="page" id="history">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <button style="background:#d32f2f;margin-bottom:10px" onclick="askDeletePassword()">🗑️ Delete History</button>
@@ -133,8 +148,6 @@ const DELETE_PASSWORD="875719";
 const UPI_ID="9471418396@ptyes";
 const PAYEE_NAME="Saraswati Puja";
 
-let CURRENT_WEB_UPI="";
-
 function openPage(id){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.getElementById(id).classList.add('active');
@@ -148,30 +161,32 @@ function showQR(){
   qrBox.style.display="block";
   qrAmount.innerText=a;
 
-  let upi=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
-  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
+  // ❗ Amount NOT fixed – user can edit in UPI app
+  let upiLink =
+   `upi://pay?pa=${UPI_ID}` +
+   `&pn=${encodeURIComponent(PAYEE_NAME)}` +
+   `&cu=INR` +
+   `&tn=Suggested Amount ₹${a}`;
 
-  CURRENT_WEB_UPI=`https://www.upi.me/pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}`;
- }else qrBox.style.display="none";
-}
+  qrImg.src =
+   "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
+   encodeURIComponent(upiLink);
 
-function openWebUPI(){
- if(!CURRENT_WEB_UPI){alert("Enter amount");return}
- window.open(CURRENT_WEB_UPI,"_blank");
+  upiBtn.href = upiLink;
+ }else{
+  qrBox.style.display="none";
+ }
 }
 
 function confirmPayment(){
  let n=donor.value,a=+amount.value;
  if(!n||a<250||a>5000){alert("Invalid details");return}
  let t=new Date().toLocaleString();
-
  fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
-
  let h=JSON.parse(localStorage.getItem("history")||"[]");
  h.push({name:n,amt:a,time:t});
  localStorage.setItem("history",JSON.stringify(h));
-
- receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
+ receiptBox.innerHTML=`Name: ${n}<br>Suggested Amount: ₹${a}<br>${t}`;
  openPage("success");
 }
 
@@ -208,6 +223,4 @@ function askDeletePassword(){
 }
 </script>
 </body>
-</html>
-
-
+</html> ISME UPI APPME UTNA HI AMOUNT ANNA CHAHIYE JITNA AMOUNT DALA GAYA HAI
