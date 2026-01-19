@@ -84,7 +84,7 @@ button,a.paybtn{
 <p class="back" onclick="goHome()">⬅ Home</p>
 
 <input id="donor" placeholder="Enter Name">
-<input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showUPI()">
+<input id="amount" type="number" placeholder="Amount (250–2000)" oninput="showUPI()">
 
 <div id="payBox" style="display:none;text-align:center">
  <p><b>Scan OR Click Pay</b></p>
@@ -143,7 +143,7 @@ function goHome(){openPage('home')}
 
 function showUPI(){
  let a=+amount.value;
- if(a>=250&&a<=5000){
+ if(a>=250&&a<=2000){
   payBox.style.display="block";
   amtTxt.innerText=a;
 
@@ -156,7 +156,7 @@ function showUPI(){
 
 function confirmPayment(){
  let n=donor.value,a=+amount.value;
- if(!n||a<250||a>5000){alert("Invalid details");return}
+ if(!n||a<250||a>2000){alert("Invalid details");return}
  let t=new Date().toLocaleString();
 
  fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
@@ -201,3 +201,4 @@ function askDeletePassword(){
 
 </body>
 </html>
+
