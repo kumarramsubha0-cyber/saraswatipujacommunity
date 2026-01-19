@@ -42,6 +42,7 @@ button{
  color:#fff;font-size:17px;cursor:pointer
 }
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
+.qrnote{font-size:13px;color:#444;margin-top:6px}
 .bottom{
  position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
  display:flex;justify-content:space-around;align-items:center
@@ -83,7 +84,7 @@ button{
 <img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
-<!-- PAY -->
+<!-- PAY (QR ONLY) -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
 
@@ -91,20 +92,17 @@ button{
 <input id="amount" type="number" placeholder="Suggested Amount (250–5000)" oninput="showQR()">
 
 <div id="qrBox" style="display:none;text-align:center">
- <p><b>Scan & Pay (Amount editable)</b></p>
+ <p><b>📷 Scan & Pay</b></p>
  <p>Suggested ₹<span id="qrAmount"></span></p>
 
  <img id="qrImg"
   style="width:100%;max-width:260px;border-radius:18px;
   box-shadow:0 10px 25px rgba(0,0,0,.3)">
 
- <a id="upiBtn"
-  style="display:block;margin-top:12px;
-  background:#1aa260;color:#fff;
-  padding:12px;border-radius:14px;
-  text-decoration:none;font-weight:bold">
-  📲 Pay Now (Open UPI App)
- </a>
+ <div class="qrnote">
+  Google Pay / PhonePe / Paytm <br>
+  किसी भी UPI App से QR scan करें
+ </div>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
@@ -112,7 +110,7 @@ button{
 
 <!-- SUCCESS -->
 <div class="page" id="success">
-<h2>✅ Payment Saved</h2>
+<h2>⏳ Payment Saved (Pending Verification)</h2>
 <div id="receiptBox" class="receipt"></div>
 <button onclick="window.print()">Print</button>
 </div>
@@ -157,22 +155,18 @@ function goHome(){openPage('home')}
 
 function showQR(){
  let a=+amount.value;
- if(a>=250&&a<=5000){
+ if(a>=250 && a<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=a;
 
-  // ❗ Amount NOT fixed – user can edit in UPI app
-  let upiLink =
+  let upiData =
    `upi://pay?pa=${UPI_ID}` +
    `&pn=${encodeURIComponent(PAYEE_NAME)}` +
-   `&cu=INR` +
-   `&tn=Suggested Amount ₹${a}`;
+   `&am=${a}&cu=INR`;
 
   qrImg.src =
    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-   encodeURIComponent(upiLink);
-
-  upiBtn.href = upiLink;
+   encodeURIComponent(upiData);
  }else{
   qrBox.style.display="none";
  }
@@ -186,7 +180,7 @@ function confirmPayment(){
  let h=JSON.parse(localStorage.getItem("history")||"[]");
  h.push({name:n,amt:a,time:t});
  localStorage.setItem("history",JSON.stringify(h));
- receiptBox.innerHTML=`Name: ${n}<br>Suggested Amount: ₹${a}<br>${t}`;
+ receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
  openPage("success");
 }
 
