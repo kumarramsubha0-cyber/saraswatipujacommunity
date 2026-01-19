@@ -43,9 +43,6 @@ button{
 }
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
 .qrnote{font-size:13px;color:#444;margin-top:6px}
-.downloadBtn{
- background:#1e88e5;margin-top:10px
-}
 .bottom{
  position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
  display:flex;justify-content:space-around;align-items:center
@@ -87,7 +84,7 @@ button{
 <img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
-<!-- PAY -->
+<!-- PAY (QR ONLY) -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
 
@@ -101,8 +98,6 @@ button{
  <img id="qrImg"
   style="width:100%;max-width:260px;border-radius:18px;
   box-shadow:0 10px 25px rgba(0,0,0,.3)">
-
- <button class="downloadBtn" onclick="downloadQR()">⬇️ Download QR Code</button>
 
  <div class="qrnote">
   Google Pay / PhonePe / Paytm <br>
@@ -165,7 +160,9 @@ function showQR(){
   qrAmount.innerText=a;
 
   let upiData =
-   `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+   `upi://pay?pa=${UPI_ID}` +
+   `&pn=${encodeURIComponent(PAYEE_NAME)}` +
+   `&am=${a}&cu=INR`;
 
   qrImg.src =
    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
@@ -173,15 +170,6 @@ function showQR(){
  }else{
   qrBox.style.display="none";
  }
-}
-
-function downloadQR(){
- let a=document.createElement("a");
- a.href=qrImg.src;
- a.download="Saraswati_Puja_QR.png";
- document.body.appendChild(a);
- a.click();
- document.body.removeChild(a);
 }
 
 function confirmPayment(){
@@ -229,4 +217,4 @@ function askDeletePassword(){
 }
 </script>
 </body>
-</html>
+</html> 
