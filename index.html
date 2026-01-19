@@ -36,10 +36,11 @@ input{
  width:100%;padding:12px;margin:10px 0;border-radius:12px;
  border:1px solid #ccc;font-size:16px
 }
-button{
+button,a.paybtn{
  width:100%;padding:14px;border:none;border-radius:14px;
  background:linear-gradient(145deg,#ff9800,#ff5722);
- color:#fff;font-size:17px;cursor:pointer
+ color:#fff;font-size:17px;cursor:pointer;
+ display:block;text-align:center;text-decoration:none
 }
 .paybtn{background:#1aa260 !important;margin-top:12px}
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
@@ -54,9 +55,7 @@ button{
 <body>
 <div class="phone">
 
-<header>
-<h1>🙏 Saraswati Puja 🙏</h1>
-</header>
+<header><h1>🙏 Saraswati Puja 🙏</h1></header>
 
 <div class="screen">
 
@@ -85,15 +84,16 @@ button{
 <p class="back" onclick="goHome()">⬅ Home</p>
 
 <input id="donor" placeholder="Enter Name">
-<input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showQR()">
+<input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showUPI()">
 
-<div id="qrBox" style="display:none;text-align:center">
- <p><b>Scan & Pay (Recommended)</b></p>
- <p>Amount ₹<span id="qrAmount"></span></p>
+<div id="payBox" style="display:none;text-align:center">
+ <p><b>Scan OR Click Pay</b></p>
+ <p>₹ <span id="amtTxt"></span></p>
 
- <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px;box-shadow:0 10px 25px rgba(0,0,0,.3)">
+ <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px">
 
- <button class="paybtn" onclick="openWebUPI()">📲 Pay Now</button>
+ <!-- ✅ DIRECT UPI LINK -->
+ <a id="upiBtn" class="paybtn">📲 Pay with UPI App</a>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
@@ -134,8 +134,6 @@ const DELETE_PASSWORD="875719";
 const UPI_ID="9471418396@ptyes";
 const PAYEE_NAME="Saraswati Puja";
 
-let CURRENT_WEB_UPI="";
-
 function openPage(id){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.getElementById(id).classList.add('active');
@@ -143,22 +141,17 @@ function openPage(id){
 }
 function goHome(){openPage('home')}
 
-function showQR(){
+function showUPI(){
  let a=+amount.value;
  if(a>=250&&a<=5000){
-  qrBox.style.display="block";
-  qrAmount.innerText=a;
+  payBox.style.display="block";
+  amtTxt.innerText=a;
 
   let upi=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+
   qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
-
-  CURRENT_WEB_UPI=`https://www.upi.me/pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}`;
- }else qrBox.style.display="none";
-}
-
-function openWebUPI(){
- if(!CURRENT_WEB_UPI){alert("Enter amount");return}
- window.open(CURRENT_WEB_UPI,"_blank");
+  upiBtn.href=upi;   // ⭐ MOST IMPORTANT LINE
+ }else payBox.style.display="none";
 }
 
 function confirmPayment(){
@@ -180,10 +173,7 @@ function loadHistory(){
  let h=JSON.parse(localStorage.getItem("history")||"[]");
  historyList.innerHTML="";
  h.forEach(r=>{
-  let d=document.createElement("div");
-  d.className="receipt";
-  d.innerHTML=`${r.name} – ₹${r.amt}<br>${r.time}`;
-  historyList.appendChild(d);
+  historyList.innerHTML+=`<div class="receipt">${r.name} – ₹${r.amt}<br>${r.time}</div>`;
  });
 }
 
@@ -208,5 +198,6 @@ function askDeletePassword(){
  }else alert("❌ Wrong password");
 }
 </script>
+
 </body>
 </html>
