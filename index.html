@@ -15,7 +15,8 @@ body{margin:0;background:#000;display:flex;justify-content:center}
  box-shadow:0 0 40px rgba(0,0,0,.7)
 }
 header{text-align:center;padding:16px}
-h1{margin:0;color:#7b3f00}
+h1{margin:0;color:#7b3f00;animation:glow 2s infinite alternate}
+@keyframes glow{from{text-shadow:0 0 5px #fff}to{text-shadow:0 0 15px gold}}
 .screen{height:640px;padding:10px}
 .page{display:none;height:100%;overflow:auto}
 .page.active{display:block}
@@ -35,12 +36,18 @@ input{
  width:100%;padding:12px;margin:10px 0;border-radius:12px;
  border:1px solid #ccc;font-size:16px
 }
-button,a.paybtn{
+button{
  width:100%;padding:14px;border:none;border-radius:14px;
- background:#1aa260;color:#fff;font-size:17px;
- text-decoration:none;display:block;text-align:center
+ background:linear-gradient(145deg,#ff9800,#ff5722);
+ color:#fff;font-size:17px;cursor:pointer
 }
+.paybtn{background:#1aa260;margin-top:12px}
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
+.bottom{
+ position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
+ display:flex;justify-content:space-around;align-items:center
+}
+.bottom div{cursor:pointer;font-size:13px}
 </style>
 </head>
 
@@ -53,8 +60,10 @@ button,a.paybtn{
 
 <div class="page active" id="home">
  <div class="apps">
+  <div class="app" onclick="openPage('puja')"><div class="icon">🎵</div>Puja</div>
+  <div class="app" onclick="openPage('card')"><div class="icon">🪔</div>Card</div>
   <div class="app" onclick="openPage('pay')"><div class="icon">₹</div>Pay</div>
-  <div class="app" onclick="openPage('history')"><div class="icon">📜</div>History</div>
+  <div class="app" onclick="openPage('receiptSearch')"><div class="icon">🧾</div>Receipt</div>
  </div>
 </div>
 
@@ -65,13 +74,16 @@ button,a.paybtn{
 <input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showUPI()">
 
 <div id="payBox" style="display:none;text-align:center">
- <p style="color:red;font-size:13px">
- ⚠️ QR ₹2000 तक | ₹2000+ के लिए नीचे Pay Button दबाएँ
- </p>
+ <p><b>₹ <span id="amtTxt"></span></b></p>
 
  <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px">
 
- <a id="upiBtn" class="paybtn">📲 Pay with UPI App</a>
+ <p style="color:red;font-size:13px">
+ ⚠️ QR ₹2000 तक<br>
+ ₹2000+ के लिए नीचे button दबाएँ
+ </p>
+
+ <button class="paybtn" onclick="payNow()">📲 Pay with UPI App</button>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
@@ -80,24 +92,21 @@ button,a.paybtn{
 <div class="page" id="success">
 <h2>✅ Payment Saved</h2>
 <div id="receiptBox" class="receipt"></div>
+<button onclick="window.print()">Print</button>
 </div>
 
-<div class="page" id="history">
-<p class="back" onclick="goHome()">⬅ Home</p>
-<div id="historyList"></div>
-</div>
-
-</div>
 </div>
 
 <script>
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
 const UPI_ID="9471418396@ptyes";
 const PAYEE_NAME="Saraswati Puja";
+
+let CURRENT_UPI="";
 
 function openPage(id){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.getElementById(id).classList.add('active');
- if(id==="history") loadHistory();
 }
 function goHome(){openPage('home')}
 
@@ -105,33 +114,31 @@ function showUPI(){
  let a=+amount.value;
  if(a>=250&&a<=5000){
   payBox.style.display="block";
+  amtTxt.innerText=a;
 
-  let upi=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+  CURRENT_UPI=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
 
-  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
-  upiBtn.href=upi;
- }else payBox.style.display="none";
+  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(CURRENT_UPI);
+ }else{
+  payBox.style.display="none";
+ }
+}
+
+function payNow(){
+ if(!CURRENT_UPI){
+  alert("Enter amount first");
+  return;
+ }
+ window.location.href=CURRENT_UPI;
 }
 
 function confirmPayment(){
  let n=donor.value,a=+amount.value;
- if(!n||a<250){alert("Invalid details");return}
+ if(!n||a<250||a>5000){alert("Invalid details");return}
  let t=new Date().toLocaleString();
-
- let h=JSON.parse(localStorage.getItem("history")||"[]");
- h.push({name:n,amt:a,time:t});
- localStorage.setItem("history",JSON.stringify(h));
-
+ fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
  receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
  openPage("success");
-}
-
-function loadHistory(){
- let h=JSON.parse(localStorage.getItem("history")||"[]");
- historyList.innerHTML="";
- h.forEach(r=>{
-  historyList.innerHTML+=`<div class="receipt">${r.name} – ₹${r.amt}<br>${r.time}</div>`;
- });
 }
 </script>
 
