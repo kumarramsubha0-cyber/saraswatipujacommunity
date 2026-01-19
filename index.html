@@ -47,6 +47,10 @@ button{
  display:flex;justify-content:space-around;align-items:center
 }
 .bottom div{cursor:pointer;font-size:13px}
+.paybtn{
+ background:#1aa260 !important;
+ margin-top:12px
+}
 </style>
 </head>
 
@@ -98,13 +102,7 @@ button{
   style="width:100%;max-width:260px;border-radius:18px;
   box-shadow:0 10px 25px rgba(0,0,0,.3)">
 
- <a id="upiBtn"
-  style="display:block;margin-top:12px;
-  background:#1aa260;color:#fff;
-  padding:12px;border-radius:14px;
-  text-decoration:none;font-weight:bold">
-  📲 Pay Now (Open UPI App)
- </a>
+ <button class="paybtn" onclick="openUPI()">📲 Pay Now (Open UPI App)</button>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
@@ -148,6 +146,8 @@ const DELETE_PASSWORD="875719";
 const UPI_ID="9471418396@ptyes";
 const PAYEE_NAME="Saraswati Puja";
 
+let CURRENT_UPI = "";
+
 function openPage(id){
  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
  document.getElementById(id).classList.add('active');
@@ -161,22 +161,26 @@ function showQR(){
   qrBox.style.display = "block";
   qrAmount.innerText = a;
 
-  // ✅ EXACT amount auto-filled in UPI app
-  let upiLink =
+  CURRENT_UPI =
    `upi://pay?pa=${UPI_ID}` +
    `&pn=${encodeURIComponent(PAYEE_NAME)}` +
    `&am=${a}` +
-   `&cu=INR` +
-   `&tn=Saraswati Puja Donation`;
+   `&cu=INR`;
 
   qrImg.src =
    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-   encodeURIComponent(upiLink);
-
-  upiBtn.href = upiLink;
+   encodeURIComponent(CURRENT_UPI);
  } else {
   qrBox.style.display = "none";
  }
+}
+
+function openUPI(){
+ if(!CURRENT_UPI){
+  alert("Enter amount first");
+  return;
+ }
+ window.location.href = CURRENT_UPI;
 }
 
 function confirmPayment(){
