@@ -156,7 +156,7 @@ function goHome(){openPage('home')}
 
 function showQR(){
  let a=+amount.value;
- if(a>=2&&a<=5000){
+ if(a>=250a<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=a;
 
@@ -171,7 +171,7 @@ function showQR(){
 
 function confirmPayment(){
  let n=donor.value,a=+amount.value;
- if(!n||a<2||a>5000){alert("Invalid details");return}
+ if(!n||a<250||a>5000){alert("Invalid details");return}
  let t=new Date().toLocaleString();
  fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
  let h=JSON.parse(localStorage.getItem("history")||"[]");
@@ -215,4 +215,5 @@ function askDeletePassword(){
 </script>
 </body>
 </html>
+
 
