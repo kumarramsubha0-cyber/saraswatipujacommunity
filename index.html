@@ -158,15 +158,24 @@ function showQR(){
  }else qrBox.style.display="none";
 }
 
+/* SAVE PAYMENT – USER MOBILE TIME */
 function confirmPayment(){
- let n=donor.value,a=+amount.value;
- if(!n||a<250||a>5000){alert("Invalid details");return}
- let t=new Date().toLocaleString();
- fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
- receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
+ let n=donor.value.trim(),a=+amount.value;
+ if(!n||a<250||a>5000){alert("Invalid details");return;}
+
+ let isoTime=new Date().toISOString(); // mobile live time
+
+ fetch(SCRIPT_URL,{
+  method:"POST",
+  body:JSON.stringify({name:n,amount:a,time:isoTime})
+ });
+
+ receiptBox.innerHTML=
+  `Name: ${n}<br>Amount: ₹${a}<br>${new Date(isoTime).toLocaleString()}`;
  openPage("success");
 }
 
+/* LOAD HISTORY – ALL USERS */
 function loadHistory(){
  historyList.innerHTML="Loading...";
  fetch(SCRIPT_URL)
@@ -174,24 +183,32 @@ function loadHistory(){
  .then(data=>{
   historyList.innerHTML="";
   data.reverse().forEach(r=>{
+   let localTime=new Date(r.time).toLocaleString();
    let d=document.createElement("div");
    d.className="receipt";
-   d.innerHTML=`${r.name} – ₹${r.amount}<br>${r.time}`;
+   d.innerHTML=`${r.name} – ₹${r.amount}<br>${localTime}`;
    historyList.appendChild(d);
   });
  });
 }
 
+/* RECEIPT SEARCH */
 function searchReceipt(){
- let n=searchName.value.trim(),a=searchAmt.value.trim();
+ let n=searchName.value.trim();
+ let a=searchAmt.value.trim();
+ if(!n||!a){alert("Enter name & amount");return;}
+
  fetch(SCRIPT_URL)
  .then(r=>r.json())
  .then(data=>{
   let r=data.find(x=>x.name===n && x.amount==a);
   if(r){
-   receiptBox.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amount}<br>${r.time}`;
+   receiptBox.innerHTML=
+    `Name: ${r.name}<br>Amount: ₹${r.amount}<br>${new Date(r.time).toLocaleString()}`;
    openPage("success");
-  }else alert("No record found");
+  }else{
+   alert("No record found");
+  }
  });
 }
 </script>
