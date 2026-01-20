@@ -51,22 +51,30 @@ button{
  position:relative
 }
 
-/* VERIFIED STAMP */
+/* 🔥 ADVANCED VERIFIED STAMP */
 .verifiedStamp{
  position:absolute;
  top:8px;
  right:8px;
- padding:6px 12px;
- border:2px solid green;
- color:green;
- font-weight:bold;
+ padding:6px 14px;
+ border:2px solid #1fa31f;
+ color:#1fa31f;
+ font-weight:800;
+ font-size:14px;
  border-radius:8px;
- transform:rotate(-10deg);
- animation:stampPop .8s ease-out;
+ background:#eaffea;
+ transform:rotate(-12deg) scale(0);
+ animation:stampPop .6s ease-out forwards, stampPulse 1.6s ease-in-out infinite;
+ box-shadow:0 0 10px rgba(31,163,31,.4);
 }
 @keyframes stampPop{
- from{transform:scale(2) rotate(-20deg);opacity:0}
- to{transform:scale(1) rotate(-10deg);opacity:1}
+ from{transform:rotate(-20deg) scale(2);opacity:0}
+ to{transform:rotate(-12deg) scale(1);opacity:1}
+}
+@keyframes stampPulse{
+ 0%{box-shadow:0 0 6px rgba(31,163,31,.4)}
+ 50%{box-shadow:0 0 16px rgba(31,163,31,.9)}
+ 100%{box-shadow:0 0 6px rgba(31,163,31,.4)}
 }
 
 .qrnote{font-size:13px;color:#444;margin-top:6px}
