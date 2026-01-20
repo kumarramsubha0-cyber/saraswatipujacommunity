@@ -51,21 +51,14 @@ button{
  position:relative
 }
 
-/* 🔥 ADVANCED VERIFIED STAMP */
+/* 🔥 VERIFIED STAMP */
 .verifiedStamp{
- position:absolute;
- top:8px;
- right:8px;
- padding:6px 14px;
- border:2px solid #1fa31f;
- color:#1fa31f;
- font-weight:800;
- font-size:14px;
- border-radius:8px;
- background:#eaffea;
+ position:absolute;top:8px;right:8px;
+ padding:6px 14px;border:2px solid #1fa31f;
+ color:#1fa31f;font-weight:800;font-size:14px;
+ border-radius:8px;background:#eaffea;
  transform:rotate(-12deg) scale(0);
- animation:stampPop .6s ease-out forwards, stampPulse 1.6s ease-in-out infinite;
- box-shadow:0 0 10px rgba(31,163,31,.4);
+ animation:stampPop .6s ease-out forwards,stampPulse 1.6s ease-in-out infinite;
 }
 @keyframes stampPop{
  from{transform:rotate(-20deg) scale(2);opacity:0}
@@ -91,13 +84,10 @@ button{
 <body>
 <div class="phone">
 
-<header>
-<h1>🙏 Saraswati Puja 🙏</h1>
-</header>
+<header><h1>🙏 Saraswati Puja 🙏</h1></header>
 
 <div class="screen">
 
-<!-- HOME -->
 <div class="page active" id="home">
  <div class="apps">
   <div class="app" onclick="openPage('puja')"><div class="icon">🎵</div>Puja</div>
@@ -107,7 +97,6 @@ button{
  </div>
 </div>
 
-<!-- PUJA -->
 <div class="page" id="puja">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <audio controls autoplay loop style="width:100%">
@@ -115,41 +104,32 @@ button{
 </audio>
 </div>
 
-<!-- CARD -->
 <div class="page" id="card">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
-<!-- PAY -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
-
 <input id="donor" placeholder="Enter Name">
 <input id="amount" type="number" placeholder="Suggested Amount (250–5000)" oninput="showQR()">
 
 <div id="qrBox" style="display:none;text-align:center">
  <p><b>📷 Scan & Pay</b></p>
  <p>Amount ₹<span id="qrAmount"></span></p>
- <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px;
- box-shadow:0 10px 25px rgba(0,0,0,.3)">
- <div class="qrnote">
-  Google Pay / PhonePe / Paytm<br>
-  किसी भी UPI App से QR scan करें
- </div>
+ <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px">
+ <div class="qrnote">किसी भी UPI App से QR scan करें</div>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
 </div>
 
-<!-- SUCCESS -->
 <div class="page" id="success">
 <h2>✅ Receipt Generated</h2>
 <div id="receiptBox" class="receipt"></div>
 <button onclick="window.print()">🖨 Print Receipt</button>
 </div>
 
-<!-- RECEIPT SEARCH -->
 <div class="page" id="receiptSearch">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <input id="searchName" placeholder="Enter Name">
@@ -157,7 +137,6 @@ button{
 <button onclick="searchReceipt()">🔍 Search Receipt</button>
 </div>
 
-<!-- HISTORY -->
 <div class="page" id="history">
 <p class="back" onclick="goHome()">⬅ Home</p>
 <div id="historyList"></div>
@@ -165,7 +144,6 @@ button{
 
 </div>
 
-<!-- BOTTOM NAV -->
 <div class="bottom">
 <div onclick="goHome()">🏠<br>Home</div>
 <div onclick="openPage('card')">🪔<br>Invite</div>
@@ -191,46 +169,39 @@ function showQR(){
  if(a>=250 && a<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=a;
-  let upiData=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
-  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upiData);
+  let upi=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
  }else qrBox.style.display="none";
 }
 
-function formatTime(time){
- return new Date(time).toLocaleString("en-IN",{
-  timeZone:"Asia/Kolkata",
-  day:"2-digit",month:"2-digit",year:"numeric",
-  hour:"2-digit",minute:"2-digit",second:"2-digit",
-  hour12:true
- });
+function formatTime(t){
+ return new Date(t).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",hour12:true});
 }
 
 function confirmPayment(){
  let n=donor.value.trim(),a=+amount.value;
  if(!n||a<250||a>5000){alert("Invalid details");return}
- let t=new Date().toISOString();
- fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
+ fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:new Date().toISOString()})});
 }
 
 function loadHistory(){
- historyList.innerHTML="Loading...";
  fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
   historyList.innerHTML="";
   data.reverse().forEach(r=>{
-   let d=document.createElement("div");
-   d.className="receipt";
-   d.innerHTML=`${r.name} – ₹${r.amount}<br>🕒 ${formatTime(r.time)}`;
-   historyList.appendChild(d);
+   historyList.innerHTML+=`<div class="receipt">${r.name} – ₹${r.amount}<br>🕒 ${formatTime(r.time)}</div>`;
   });
  });
 }
 
 function searchReceipt(){
- let n=searchName.value.trim(),a=searchAmt.value.trim();
+ let n=searchName.value.trim().toLowerCase();
+ let a=searchAmt.value.trim();
  if(!n||!a){alert("Enter name & amount");return}
 
  fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
-  let r=data.find(x=>x.name===n && x.amount==a);
+  let r=data.find(x =>
+   x.name && x.name.toLowerCase().trim()===n && x.amount==a
+  );
   if(r){
    receiptBox.innerHTML=`
     <div class="verifiedStamp">✔ VERIFIED</div>
@@ -239,7 +210,7 @@ function searchReceipt(){
     🕒 ${formatTime(r.time)}
    `;
    openPage("success");
-  }else alert("No record found");
+  }else alert("❌ Receipt not found");
  });
 }
 </script>
