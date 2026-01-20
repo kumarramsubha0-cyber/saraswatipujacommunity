@@ -15,8 +15,7 @@ body{margin:0;background:#000;display:flex;justify-content:center}
  box-shadow:0 0 40px rgba(0,0,0,.7)
 }
 header{text-align:center;padding:16px}
-h1{margin:0;color:#7b3f00;animation:glow 2s infinite alternate}
-@keyframes glow{from{text-shadow:0 0 5px #fff}to{text-shadow:0 0 15px gold}}
+h1{margin:0;color:#7b3f00}
 .screen{height:640px;padding:10px}
 .page{display:none;height:100%;overflow:auto}
 .page.active{display:block}
@@ -42,7 +41,6 @@ button{
  color:#fff;font-size:17px;cursor:pointer
 }
 .receipt{background:#fff;padding:14px;border-radius:14px;margin-top:10px}
-.qrnote{font-size:13px;color:#444;margin-top:6px}
 .bottom{
  position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
  display:flex;justify-content:space-around;align-items:center
@@ -63,25 +61,10 @@ button{
 <!-- HOME -->
 <div class="page active" id="home">
  <div class="apps">
-  <div class="app" onclick="openPage('puja')"><div class="icon">🎵</div>Puja</div>
-  <div class="app" onclick="openPage('card')"><div class="icon">🪔</div>Card</div>
   <div class="app" onclick="openPage('pay')"><div class="icon">₹</div>Pay</div>
   <div class="app" onclick="openPage('receiptSearch')"><div class="icon">🧾</div>Receipt</div>
+  <div class="app" onclick="openPage('history')"><div class="icon">📜</div>History</div>
  </div>
-</div>
-
-<!-- PUJA -->
-<div class="page" id="puja">
-<p class="back" onclick="goHome()">⬅ Home</p>
-<audio controls autoplay loop style="width:100%">
- <source src="puja-song.m4a">
-</audio>
-</div>
-
-<!-- CARD -->
-<div class="page" id="card">
-<p class="back" onclick="goHome()">⬅ Home</p>
-<img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
 <!-- PAY -->
@@ -89,17 +72,12 @@ button{
 <p class="back" onclick="goHome()">⬅ Home</p>
 
 <input id="donor" placeholder="Enter Name">
-<input id="amount" type="number" placeholder="Suggested Amount (250–5000)" oninput="showQR()">
+<input id="amount" type="number" placeholder="Amount (250–5000)" oninput="showQR()">
 
 <div id="qrBox" style="display:none;text-align:center">
  <p><b>📷 Scan & Pay</b></p>
- <p>Suggested ₹<span id="qrAmount"></span></p>
- <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px;
- box-shadow:0 10px 25px rgba(0,0,0,.3)">
- <div class="qrnote">
-  Google Pay / PhonePe / Paytm <br>
-  किसी भी UPI App से QR scan करें
- </div>
+ <p>₹ <span id="qrAmount"></span></p>
+ <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px">
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
@@ -107,7 +85,7 @@ button{
 
 <!-- SUCCESS -->
 <div class="page" id="success">
-<h2>⏳ Payment Saved (Pending Verification)</h2>
+<h3>🧾 Payment Receipt</h3>
 <div id="receiptBox" class="receipt"></div>
 <button onclick="window.print()">Print</button>
 </div>
@@ -117,7 +95,7 @@ button{
 <p class="back" onclick="goHome()">⬅ Home</p>
 <input id="searchName" placeholder="Name">
 <input id="searchAmt" placeholder="Amount">
-<button onclick="searchReceipt()">Search</button>
+<button onclick="searchReceipt()">Search Receipt</button>
 </div>
 
 <!-- HISTORY -->
@@ -130,7 +108,6 @@ button{
 
 <div class="bottom">
 <div onclick="goHome()">🏠 Home</div>
-<div onclick="openPage('card')">🪔 Invitation</div>
 <div onclick="openPage('history')">📜 History</div>
 </div>
 
@@ -153,40 +130,30 @@ function showQR(){
  if(a>=250 && a<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=a;
-  let upiData=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
-  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upiData);
+  let upi=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upi);
  }else qrBox.style.display="none";
 }
 
-/* SAVE PAYMENT – USER MOBILE TIME */
+/* SAVE PAYMENT */
 function confirmPayment(){
  let n=donor.value.trim(),a=+amount.value;
  if(!n||a<250||a>5000){alert("Invalid details");return;}
-
- let isoTime=new Date().toISOString(); // mobile live time
-
- fetch(SCRIPT_URL,{
-  method:"POST",
-  body:JSON.stringify({name:n,amount:a,time:isoTime})
- });
-
- receiptBox.innerHTML=
-  `Name: ${n}<br>Amount: ₹${a}<br>${new Date(isoTime).toLocaleString()}`;
- openPage("success");
+ let t=new Date().toISOString();
+ fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
+ alert("Payment saved");
+ goHome();
 }
 
-/* LOAD HISTORY – ALL USERS */
+/* HISTORY FROM GOOGLE SHEET */
 function loadHistory(){
  historyList.innerHTML="Loading...";
- fetch(SCRIPT_URL)
- .then(r=>r.json())
- .then(data=>{
+ fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
   historyList.innerHTML="";
   data.reverse().forEach(r=>{
-   let localTime=new Date(r.time).toLocaleString();
    let d=document.createElement("div");
    d.className="receipt";
-   d.innerHTML=`${r.name} – ₹${r.amount}<br>${localTime}`;
+   d.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amount}<br>Date & Time: ${new Date(r.time).toLocaleString()}`;
    historyList.appendChild(d);
   });
  });
@@ -194,23 +161,18 @@ function loadHistory(){
 
 /* RECEIPT SEARCH */
 function searchReceipt(){
- let n=searchName.value.trim();
- let a=searchAmt.value.trim();
+ let n=searchName.value.trim(),a=searchAmt.value.trim();
  if(!n||!a){alert("Enter name & amount");return;}
-
- fetch(SCRIPT_URL)
- .then(r=>r.json())
- .then(data=>{
-  let r=data.find(x=>x.name===n && x.amount==a);
-  if(r){
+ fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
+  let rec=data.find(x=>x.name===n && x.amount==a);
+  if(rec){
    receiptBox.innerHTML=
-    `Name: ${r.name}<br>Amount: ₹${r.amount}<br>${new Date(r.time).toLocaleString()}`;
+    `Name: ${rec.name}<br>Amount: ₹${rec.amount}<br>Date & Time: ${new Date(rec.time).toLocaleString()}`;
    openPage("success");
-  }else{
-   alert("No record found");
-  }
+  }else alert("No record found");
  });
 }
 </script>
+
 </body>
 </html>
