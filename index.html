@@ -51,7 +51,7 @@ button{
  position:relative
 }
 
-/* 🔥 VERIFIED STAMP */
+/* VERIFIED STAMP */
 .verifiedStamp{
  position:absolute;top:8px;right:8px;
  padding:6px 14px;border:2px solid #1fa31f;
@@ -69,8 +69,6 @@ button{
  50%{box-shadow:0 0 16px rgba(31,163,31,.9)}
  100%{box-shadow:0 0 6px rgba(31,163,31,.4)}
 }
-
-.qrnote{font-size:13px;color:#444;margin-top:6px}
 
 .bottom{
  position:absolute;bottom:0;left:0;right:0;height:60px;background:#fff;
@@ -118,14 +116,13 @@ button{
  <p><b>📷 Scan & Pay</b></p>
  <p>Amount ₹<span id="qrAmount"></span></p>
  <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px">
- <div class="qrnote">किसी भी UPI App से QR scan करें</div>
 </div>
 
 <button onclick="confirmPayment()">Payment Done</button>
 </div>
 
 <div class="page" id="success">
-<h2>✅ Receipt Generated</h2>
+<h2>✅ Receipt Verified</h2>
 <div id="receiptBox" class="receipt"></div>
 <button onclick="window.print()">🖨 Print Receipt</button>
 </div>
@@ -174,21 +171,18 @@ function showQR(){
  }else qrBox.style.display="none";
 }
 
-function formatTime(t){
- return new Date(t).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",hour12:true});
-}
-
 function confirmPayment(){
  let n=donor.value.trim(),a=+amount.value;
  if(!n||a<250||a>5000){alert("Invalid details");return}
  fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:new Date().toISOString()})});
+ alert("Payment recorded. You can verify receipt anytime.");
 }
 
 function loadHistory(){
  fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
   historyList.innerHTML="";
   data.reverse().forEach(r=>{
-   historyList.innerHTML+=`<div class="receipt">${r.name} – ₹${r.amount}<br>🕒 ${formatTime(r.time)}</div>`;
+   historyList.innerHTML+=`<div class="receipt">${r.name} – ₹${r.amount}</div>`;
   });
  });
 }
@@ -199,15 +193,12 @@ function searchReceipt(){
  if(!n||!a){alert("Enter name & amount");return}
 
  fetch(SCRIPT_URL).then(r=>r.json()).then(data=>{
-  let r=data.find(x =>
-   x.name && x.name.toLowerCase().trim()===n && x.amount==a
-  );
+  let r=data.find(x=>x.name && x.name.toLowerCase().trim()===n && x.amount==a);
   if(r){
    receiptBox.innerHTML=`
     <div class="verifiedStamp">✔ VERIFIED</div>
     <b>Name:</b> ${r.name}<br>
-    <b>Amount:</b> ₹${r.amount}<br>
-    🕒 ${formatTime(r.time)}
+    <b>Amount:</b> ₹${r.amount}
    `;
    openPage("success");
   }else alert("❌ Receipt not found");
