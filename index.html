@@ -84,7 +84,7 @@ button{
 <img src="photo.jpg" style="width:100%;border-radius:18px">
 </div>
 
-<!-- PAY (QR ONLY) -->
+<!-- PAY -->
 <div class="page" id="pay">
 <p class="back" onclick="goHome()">⬅ Home</p>
 
@@ -94,11 +94,8 @@ button{
 <div id="qrBox" style="display:none;text-align:center">
  <p><b>📷 Scan & Pay</b></p>
  <p>Suggested ₹<span id="qrAmount"></span></p>
-
- <img id="qrImg"
-  style="width:100%;max-width:260px;border-radius:18px;
-  box-shadow:0 10px 25px rgba(0,0,0,.3)">
-
+ <img id="qrImg" style="width:100%;max-width:260px;border-radius:18px;
+ box-shadow:0 10px 25px rgba(0,0,0,.3)">
  <div class="qrnote">
   Google Pay / PhonePe / Paytm <br>
   किसी भी UPI App से QR scan करें
@@ -126,7 +123,6 @@ button{
 <!-- HISTORY -->
 <div class="page" id="history">
 <p class="back" onclick="goHome()">⬅ Home</p>
-<button style="background:#d32f2f;margin-bottom:10px" onclick="askDeletePassword()">🗑️ Delete History</button>
 <div id="historyList"></div>
 </div>
 
@@ -142,7 +138,6 @@ button{
 
 <script>
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwGDtbbeF4yyao_WKysSJxcwbtFF8D_s1VFA4kCEVLgtqyfByWW22F9TgHE2aqRJQTs/exec";
-const DELETE_PASSWORD="875719";
 const UPI_ID="9471418396@ptyes";
 const PAYEE_NAME="Saraswati Puja";
 
@@ -158,18 +153,9 @@ function showQR(){
  if(a>=250 && a<=5000){
   qrBox.style.display="block";
   qrAmount.innerText=a;
-
-  let upiData =
-   `upi://pay?pa=${UPI_ID}` +
-   `&pn=${encodeURIComponent(PAYEE_NAME)}` +
-   `&am=${a}&cu=INR`;
-
-  qrImg.src =
-   "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
-   encodeURIComponent(upiData);
- }else{
-  qrBox.style.display="none";
- }
+  let upiData=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${a}&cu=INR`;
+  qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data="+encodeURIComponent(upiData);
+ }else qrBox.style.display="none";
 }
 
 function confirmPayment(){
@@ -177,44 +163,37 @@ function confirmPayment(){
  if(!n||a<250||a>5000){alert("Invalid details");return}
  let t=new Date().toLocaleString();
  fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({name:n,amount:a,time:t})});
- let h=JSON.parse(localStorage.getItem("history")||"[]");
- h.push({name:n,amt:a,time:t});
- localStorage.setItem("history",JSON.stringify(h));
  receiptBox.innerHTML=`Name: ${n}<br>Amount: ₹${a}<br>${t}`;
  openPage("success");
 }
 
 function loadHistory(){
- let h=JSON.parse(localStorage.getItem("history")||"[]");
- historyList.innerHTML="";
- h.forEach(r=>{
-  let d=document.createElement("div");
-  d.className="receipt";
-  d.innerHTML=`${r.name} – ₹${r.amt}<br>${r.time}`;
-  historyList.appendChild(d);
+ historyList.innerHTML="Loading...";
+ fetch(SCRIPT_URL)
+ .then(r=>r.json())
+ .then(data=>{
+  historyList.innerHTML="";
+  data.reverse().forEach(r=>{
+   let d=document.createElement("div");
+   d.className="receipt";
+   d.innerHTML=`${r.name} – ₹${r.amount}<br>${r.time}`;
+   historyList.appendChild(d);
+  });
  });
 }
 
 function searchReceipt(){
- let n=searchName.value,a=searchAmt.value;
- let h=JSON.parse(localStorage.getItem("history")||"[]");
- let r=h.find(x=>x.name===n&&x.amt==a);
- if(r){
-  receiptBox.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amt}<br>${r.time}`;
-  openPage("success");
- }else alert("No record found");
-}
-
-function askDeletePassword(){
- let p=prompt("Enter delete password:");
- if(p===DELETE_PASSWORD){
-  if(confirm("Delete all local history?")){
-   localStorage.removeItem("history");
-   loadHistory();
-   alert("History deleted");
-  }
- }else alert("❌ Wrong password");
+ let n=searchName.value.trim(),a=searchAmt.value.trim();
+ fetch(SCRIPT_URL)
+ .then(r=>r.json())
+ .then(data=>{
+  let r=data.find(x=>x.name===n && x.amount==a);
+  if(r){
+   receiptBox.innerHTML=`Name: ${r.name}<br>Amount: ₹${r.amount}<br>${r.time}`;
+   openPage("success");
+  }else alert("No record found");
+ });
 }
 </script>
 </body>
-</html> 
+</html>
